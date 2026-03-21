@@ -39,14 +39,14 @@ def print_rows(rows):
         print(row)
 
 
-def draw_path(path):
+def draw_path(path, max_len):
     x_c, y_c = zip(*path)
     plt.plot(x_c, y_c, marker='o', color='b', linestyle='-')
     plt.gca().invert_yaxis()
-    plt.xlim(-1, 5)
-    plt.ylim(5, -1)
-    plt.xticks(range(5))
-    plt.yticks(range(5))
+    plt.xlim(-1, max_len)
+    plt.ylim(max_len, -1)
+    plt.xticks(range(max_len))
+    plt.yticks(range(max_len))
     plt.grid(True)
     plt.show()
 
@@ -99,7 +99,7 @@ def analysis(field):
                 result_row.append(".")
         result_field.append(result_row)
 
-    print_rows(result_field)
+    # print_rows(result_field)
     locked_pipes = set()
     paths = []
     while True:
@@ -109,58 +109,33 @@ def analysis(field):
         paths.append(path)
         locked_pipes.update(path)
     max_path = max(paths, key=len)
-    print(f"max path - {max_path}")
-    draw_path(max_path)
+    # print(f"max path - {max_path}")
+    print(f"max count - {int((len(max_path) + 1) / 2)}")
+    draw_path(max_path, len(field))
+    return [s_coords,] + max_path
 
 
-#    0   1   2   3   4
-# 0[".",".",".",".","."],
-# 1[".","S","-","7","."],
-# 2[".","|",".","|","."],
-# 3[".","L","-","J","."],
-# 4[".",".",".",".","."]
+def open_file():
+    field = []
+    with open("puzzle_input.txt", "r", encoding="utf-8") as f:
+        for line in f:
+            row = list(line.strip())
+            field.append(row)
+    return field
 
 
-test1 = [
-    [".",".",".",".","."],
-    [".","S","-","7","."],
-    [".","|",".","|","."],
-    [".","L","-","J","."],
-    [".",".",".",".","."]
-]
+path = analysis(open_file())
 
 
-analysis(test1)
+def analysis_path(path):
+    path_len = len(path)
+    total_sum = 0
+    for i in range(path_len):
+        x1, y1 = path[i]
+        x2, y2 = path[(i + 1) % path_len]
+        total_sum += (x1 * y2) - (x2 * y1)
+    area = abs(total_sum) / 2
+    print(f'nests count - {int(area - (path_len / 2) + 1)}')
 
 
-#    0   1   2   3   4
-#0 [".",".","F","7","."],
-#1 [".","F","J","|","."],
-#2 ["S","J",".","L","7"],
-#3 ["|","F","-","-","J"],
-#4 ["L","J",".",".","."]
-
-
-test2 = [
-    [".",".","F","7","."],
-    [".","F","J","|","."],
-    ["S","J",".","L","7"],
-    ["|","F","-","-","J"],
-    ["L","J",".",".","."]
-]
-
-
-analysis(test2)
-
-
-test3 = [
-    ["7","-","F","7","-"],
-    [".","F","J","|","7"],
-    ["S","J","L","L","7"],
-    ["|","F","-","-","J"],
-    ["L","J",".","L","J"]
-]
-
-
-analysis(test3)
-
+analysis_path(path)
